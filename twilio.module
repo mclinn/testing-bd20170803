@@ -73,7 +73,8 @@ function twilio_menu_alter(&$callbacks) {
   $callbacks['user/%user_category/edit/twilio']['module'] = 'twilio';
   $callbacks['user/%user_category/edit/twilio']['page arguments'] = array(1);
   $callbacks['user/%user_category/edit/twilio']['file'] = 'twilio.pages.inc';
-  $callbacks['user/%user_category/edit/twilio']['access callback'] = array('twilio_edit_access');
+ // $callbacks['user/%user_category/edit/twilio']['access callback'] = array('twilio_edit_access');
+  $callbacks['user/%user_category/edit/twilio']['access callback'] = TRUE;  // 8/17/mcl
 }
 
 /**
@@ -140,6 +141,12 @@ function twilio_libraries_info() {
  *   TRUE or FALSE if the message was successfully sent.
  */
 function twilio_send($number, $message, $country = TWILIO_DEFAULT_COUNTRY_CODE, $media = NULL, $options = array()) {
+	// 8/17/mcl
+if (true)  {
+     drupal_set_message("DEBUG: No message sent");
+     return;
+ }
+   
   switch (variable_get('twilio_long_sms', TWILIO_SMS_LONG_MULTIPLE)) {
     case TWILIO_SMS_LONG_TRUNCATE:
       // Truncate the message to 160 characters.
@@ -521,4 +528,22 @@ function twilio_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'twilio'),
   );
+}
+
+
+/**
+ * Implements hook_form_alter().
+ */
+
+function twilio_form_alter(&$form, $form_state, $form_id) {
+	//return;
+	
+	  if ('user_profile_form' === $form_id) {
+	 // 	  drupal_set_message("this is the profile form");	
+	  	  $form['some_text'] = array(
+  '#markup' => '<p><a href = "edit/twilio">TWILIO</a></p>',
+  '#weight' => -10,
+);
+	  }
+	
 }

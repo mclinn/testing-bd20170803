@@ -34,9 +34,12 @@ function twilio_user_settings_form($form, &$form_state, $account) {
       '#title' => t('Country code'),
       '#options' => twilio_country_codes(),
     );
+    
+    // 8/17/mcl: testing values
     $form['number'] = array(
       '#type' => 'textfield',
-      '#title' => t('Phone number'),
+      '#title' => t('TESTING! Phone number'),
+      '#default_value' => '7078324618',
       '#description' => t('A confirmation code will be sent to via SMS to the number provided'),
       '#size' => 40,
       '#maxlength' => 255,
@@ -180,11 +183,19 @@ function twilio_user_settings_confirm_form_submit($form, &$form_state) {
     drupal_set_message(t('Your mobile information has been removed'), 'status');
   }
   else {
-    $data = array(
+  	
+/*    $data = array(
       'number' => $account->twilio_user['number'],
-      'status' => TWILIO_USER_CONFIRMED,
-    );
-    $account = user_save($account, array('twilio' => $data), 'twilio');
+      'status' => TWILIO_USER_CONFIRMED,            
+    );*/
+    
+    // 8/17/mcl: new hook, only one param. modify $account first
+    $account->twilio_user['status'] = TWILIO_USER_CONFIRMED;     
+    //$account = user_save($account, array('twilio' => $data), 'twilio');
+   // $account = user_save($account);
+    //user_save($account);
+    twilio_user_save($account);
+    
     drupal_set_message(t('Your mobile number has been confirmed'), 'status');
   }
   $form_state['values']['account'] = $account;

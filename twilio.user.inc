@@ -60,9 +60,22 @@ function twilio_user_delete($account) {
 
 /**
  * Saves mobile number data to the {twilio_user} table in the database.
+ *  8/17/mcl: modify call, only one param in backdrop hook_user_save
  */
-function twilio_user_save(&$edit, $account, $category) {
-  if (($category == 'twilio') && isset($edit['twilio'])) {
+//function twilio_user_save(&$edit, $account, $category) {
+function twilio_user_save($account) {
+	// 8/17/mcl: next 4
+	 $now = date("D M j G:i:s T Y"); 
+  $msg = "twilio_user_save, TOP, $now";
+   drupal_set_message($msg);
+  // backdrop_set_message($msg);
+  watchdog("twilioport", $msg);
+//  dsm($account);
+	//return;
+	
+ /* 
+ rewrite this block for backdrop, only one param passed
+ if (($category == 'twilio') && isset($edit['twilio'])) {
     $number = (object) $edit['twilio'];
     $number->uid = $account->uid;
 
@@ -72,12 +85,73 @@ function twilio_user_save(&$edit, $account, $category) {
         $primary_keys = array('uid');
       }
     }
+    
+       // 8/17/mcl: next 4
+  $now = date("D M j G:i:s T Y"); 
+  $msg = "Fixin to write drupal record, $now";
+  drupal_set_message($msg);
+  watchdog("twilioport", $msg);
+  dsm($account);
+    
+    
+    drupal_write_record('twilio_user', $number, $primary_keys);
+
+    $edit['twilio']['number'] = NULL;
+    $edit['twilio']['status'] = NULL;
+    $edit['twilio']['code'] = NULL;
+  }*/
+  
+  // above block rewritten
+ //   if (($category == 'twilio') && isset($edit['twilio'])) {
+    if (isset($account->twilio_user['status'])) {
+//    	backdrop_set_message("past 1st if block in twilio_user_save");
+  //  	return;
+    	
+    //$number = (object) $edit['twilio'];
+   // $number = (object) $account->twilio_user;
+    $number = $account->twilio_user;
+    $number->uid = $account->uid;
+   
+   //	backdrop_set_message("Here is the NUMBER object");
+   	//dsm($number);
+  	//return;
+
+
+
+    $primary_keys = array();
+    if (isset($account->twilio_user['status'])) {
+  //    if ($account->twilio_user['status'] == TWILIO_USER_PENDING && $edit['twilio']['status'] == TWILIO_USER_CONFIRMED) {
+      if ($account->twilio_user['status'] == TWILIO_USER_CONFIRMED) {
+  //    if (false) {
+        $primary_keys = array('uid');
+      }
+    }
+    
+       // 8/17/mcl: next 4
+  $now = date("D M j G:i:s T Y"); 
+  $msg = "Fixin to write drupal record, $now";
+  drupal_set_message($msg);
+  watchdog("twilioport", $msg);
+  dsm($account);
+    
+    
     drupal_write_record('twilio_user', $number, $primary_keys);
 
     $edit['twilio']['number'] = NULL;
     $edit['twilio']['status'] = NULL;
     $edit['twilio']['code'] = NULL;
   }
+  
+  
+  
+  
+  else // 8/17/mcl
+  {
+  	dsm($edit);
+  	dsm($account);
+  	dsm($category);
+  	}
+  
 }
 
 /**
@@ -178,8 +252,83 @@ function twilio_user_send_confirmation($account, $number, $country) {
     'code' => $code,
   );
 
-  $account = user_save($account, array('twilio' => $data), 'twilio');
+
+ // 8/17/mcl: next 4
+  $now = date("D M j G:i:s T Y"); 
+//  $msg = "user_send_conf call, $now";
+ // $msg .= "about to call user_save";
+
+  //drupal_set_message($msg);
+//  watchdog("twilioport", $msg);
+
+  //dsm($account);  
+
+  // 8/17/mcl
+  //drupal_set_message("this is twilio_user_send_confirmation");
+  //dsm($account);
+
+  // 8/17/mcl: update array before call to user_save
+//  $account->twilio = $data;  
+  $account->twilio_user = $data;  
+
+ //  dsm($account);
+
+//  $account = user_save($account, array('twilio' => $data), 'twilio');
+ // $account = user_save($account);   // diff hook for backdrop
+  
+  // 8/17/mcl: call this directly, not firing
+  twilio_user_save($account);   // diff hook for backdrop
+ 
+  
+
+  $msg = "\n\n BACK FROM Modified!  user_save";
+  drupal_set_message($msg);
+  watchdog("twilioport", $msg);
+  dsm($account);
+
+  
   $message = "Confirmation code: $code";
   twilio_send($number, $message, $country);
   return $account;
 }
+
+
+// 8/17/mcl: copy from drupal 7 core user.modules
+/**
+ * Return a user object after checking if any profile category in the path exists.
+ */
+function user_category_load($uid, &$map, $index) {
+  static $user_categories, $accounts;
+
+  // Cache $account - this load function will get called for each profile tab.
+  if (!isset($accounts[$uid])) {
+    $accounts[$uid] = user_load($uid);
+  }
+  $valid = TRUE;
+  if ($account = $accounts[$uid]) {
+    // Since the path is like user/%/edit/category_name, the category name will
+    // be at a position 2 beyond the index corresponding to the % wildcard.
+    $category_index = $index + 2;
+    // Valid categories may contain slashes, and hence need to be imploded.
+    $category_path = implode('/', array_slice($map, $category_index));
+    if ($category_path) {
+      // Check that the requested category exists.
+      $valid = FALSE;
+      if (!isset($user_categories)) {
+        $user_categories = _user_categories();
+      }
+      foreach ($user_categories as $category) {
+        if ($category['name'] == $category_path) {
+          $valid = TRUE;
+          // Truncate the map array in case the category name had slashes.
+          $map = array_slice($map, 0, $category_index);
+          // Assign the imploded category name to the last map element.
+          $map[$category_index] = $category_path;
+          break;
+        }
+      }
+    }
+  }
+  return $valid ? $account : FALSE;
+}
+
