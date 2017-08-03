@@ -67,7 +67,7 @@ function twilio_user_save($account) {
 	// 8/17/mcl: next 4
 	 $now = date("D M j G:i:s T Y"); 
   $msg = "twilio_user_save, TOP, $now";
-   drupal_set_message($msg);
+  // drupal_set_message($msg);
   // backdrop_set_message($msg);
   watchdog("twilioport", $msg);
 //  dsm($account);
@@ -130,9 +130,9 @@ function twilio_user_save($account) {
        // 8/17/mcl: next 4
   $now = date("D M j G:i:s T Y"); 
   $msg = "Fixin to write drupal record, $now";
-  drupal_set_message($msg);
+//  drupal_set_message($msg);
   watchdog("twilioport", $msg);
-  dsm($account);
+  //dsm($account);
     
     
     drupal_write_record('twilio_user', $number, $primary_keys);
@@ -142,15 +142,7 @@ function twilio_user_save($account) {
     $edit['twilio']['code'] = NULL;
   }
   
-  
-  
-  
-  else // 8/17/mcl
-  {
-  	dsm($edit);
-  	dsm($account);
-  	dsm($category);
-  	}
+    
   
 }
 
@@ -282,9 +274,9 @@ function twilio_user_send_confirmation($account, $number, $country) {
   
 
   $msg = "\n\n BACK FROM Modified!  user_save";
-  drupal_set_message($msg);
+//  drupal_set_message($msg);
   watchdog("twilioport", $msg);
-  dsm($account);
+  //dsm($account);
 
   
   $message = "Confirmation code: $code";
