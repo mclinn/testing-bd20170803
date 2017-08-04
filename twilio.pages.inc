@@ -39,7 +39,7 @@ function twilio_user_settings_form($form, &$form_state, $account) {
     $form['number'] = array(
       '#type' => 'textfield',
       '#title' => t('TESTING! Phone number'),
-      '#default_value' => '7078324618',
+      '#default_value' => '',
       '#description' => t('A confirmation code will be sent to via SMS to the number provided'),
       '#size' => 40,
       '#maxlength' => 255,
