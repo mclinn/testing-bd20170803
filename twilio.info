@@ -1,8 +1,11 @@
+; 8/17/mcl updt for backdrop
+
 name = Twilio
 description = Integration the Twilio cloud communication service with Drupal
-core = 7.x
+backdrop = 1.x
 package = Twilio
 dependencies[] = libraries
+type = module
 
 ; Information added by Drupal.org packaging script on 2015-09-30
 version = "7.x-1.11"
